@@ -3,69 +3,87 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-    <title>BookLoop | Expert Reservation</title>
+    <title>BookLoop | Premium Reservation</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        
+        /* Mobile Bottom Sheet Cart */
         @media (max-width: 1024px) {
             #sidebar {
                 position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
                 transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                 max-height: 85vh; overflow-y: auto; border-radius: 32px 32px 0 0;
+                box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1);
             }
-            #sidebar.active { transform: translateY(0); box-shadow: 0 -20px 25px -5px rgba(0,0,0,0.1); }
+            #sidebar.active { transform: translateY(0); }
             .overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 40; }
             .overlay.active { display: block; }
         }
-        .animate-pop { animation: pop 0.3s ease-out; }
-        @keyframes pop { 0% { transform: scale(0.95); } 100% { transform: scale(1); } }
+
+        /* Smooth UI Transitions */
+        .book-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .book-card:hover { transform: translateY(-4px); }
+        .btn-primary { transition: all 0.2s ease; }
+        .btn-primary:active { transform: scale(0.96); }
+        
+        /* Custom Scrollbar */
+        #cartContent::-webkit-scrollbar { width: 4px; }
+        #cartContent::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body class="pb-24 lg:pb-0">
+
     <div class="overlay" id="overlay"></div>
 
     <header class="sticky top-0 z-30 glass border-b border-slate-200 px-4 py-4">
         <div class="max-w-7xl mx-auto flex flex-col gap-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-black text-indigo-600 tracking-tight italic">BookLoop.</h1>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">0.2s Local Inventory Loading</p>
+                    <h1 class="text-2xl font-extrabold text-indigo-600 tracking-tight italic">BookLoop.</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Reservation Portal</p>
                 </div>
                 <button id="mobileCartBtn" class="lg:hidden bg-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl flex items-center gap-2">
                     🛒 <span id="mobileCount">0</span>
                 </button>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <input id="searchTitle" type="search" placeholder="Search title..." class="bg-slate-100 rounded-2xl px-4 py-3 text-sm border-none focus:ring-2 focus:ring-indigo-500 outline-none" />
-                <select id="filterAuthor" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none"><option value="">All Authors</option></select>
-                <select id="filterGenre" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none"><option value="">All Genres</option></select>
+                <input id="searchTitle" type="search" placeholder="Search by title..." class="bg-slate-100 rounded-2xl px-4 py-3 text-sm border-none focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <select id="filterAuthor" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none outline-none focus:ring-2 focus:ring-indigo-500"><option value="">All Authors</option></select>
+                <select id="filterGenre" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none outline-none focus:ring-2 focus:ring-indigo-500"><option value="">All Genres</option></select>
             </div>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="flex flex-col lg:flex-row gap-10">
+            
             <main class="flex-1">
                 <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     </div>
             </main>
 
-            <aside id="sidebar" class="w-full lg:w-[400px] bg-white p-8 border-l border-slate-100 flex flex-col">
+            <aside id="sidebar" class="w-full lg:w-[400px] bg-white p-8 border-l border-slate-100 flex flex-col h-fit lg:sticky lg:top-32">
                 <div class="flex justify-between items-center mb-8">
-                    <h3 class="text-xl font-bold tracking-tight">Your Cart</h3>
-                    <button id="clearCart" class="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-full">Reset</button>
+                    <h3 class="text-xl font-bold tracking-tight text-slate-900">Your Selection</h3>
+                    <button id="clearCart" class="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-full transition-colors">Reset</button>
                 </div>
                 
-                <div id="cartContent" class="space-y-4 mb-8 flex-grow">
-                    <div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest">Basket is empty</div>
+                <div id="cartContent" class="space-y-4 mb-8 flex-grow overflow-y-auto max-h-[40vh] lg:max-h-[50vh] pr-2">
+                    <div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest leading-loose">
+                        Your basket is empty<br/>Start adding books!
+                    </div>
                 </div>
 
                 <div class="border-t border-slate-100 pt-6 space-y-4">
                     <div class="flex justify-between text-slate-500 uppercase text-[10px] font-bold tracking-widest">
-                        <span>Total Items</span> 
-                        <span id="totalQty">0</span>
+                        <span>Items Count</span> 
+                        <span id="totalQty" class="text-slate-900">0</span>
                     </div>
                     <div class="flex justify-between text-3xl font-black text-slate-900">
                         <span>Total</span> 
@@ -73,57 +91,81 @@
                     </div>
                 </div>
 
-                <button id="confirmBtn" class="w-full mt-8 bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 transition-all active:scale-95">Confirm Reservation</button>
-                <div id="confirmationBox" class="hidden mt-6 animate-pop"></div>
+                <button id="confirmBtn" class="w-full mt-8 bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 transition-all active:scale-95 btn-primary">
+                    Confirm Reservation
+                </button>
+                
+                <div id="confirmationBox" class="hidden mt-6"></div>
+                
                 <button id="closeCart" class="lg:hidden w-full mt-6 text-slate-300 text-[10px] font-bold tracking-[.3em] py-2">CLOSE CART</button>
             </aside>
         </div>
     </div>
 
     <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
-        <div class="bg-white w-full max-w-md rounded-[40px] p-10 shadow-2xl text-center animate-pop">
-            <h2 class="text-2xl font-black mb-4">Wait!</h2>
-            <p class="text-sm text-slate-500 mb-8 leading-relaxed">Payment must be completed first. You'll get an <b>Order ID</b> here, then finish the details in a Google Form.</p>
-            <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer">
-                <input id="agreeCheckbox" type="checkbox" class="w-6 h-6 rounded-lg border-slate-200 text-indigo-600 shadow-sm focus:ring-0"/> 
-                <span class="text-sm font-bold text-slate-700">I agree to the terms</span>
+        <div class="bg-white w-full max-w-md rounded-[40px] p-10 shadow-2xl text-center">
+            <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">⚡</div>
+            <h2 class="text-2xl font-black text-slate-900 mb-4 tracking-tight">Ready to Reserve?</h2>
+            <p class="text-sm text-slate-500 mb-8 leading-relaxed px-4">
+                Orders are <b>Pick-up Only</b>. Once you confirm, you will receive an Order ID to complete your payment via Google Forms.
+            </p>
+            <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer group">
+                <input id="agreeCheckbox" type="checkbox" class="w-6 h-6 rounded-lg border-slate-200 text-indigo-600 shadow-sm focus:ring-0 transition-all cursor-pointer"/> 
+                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">I understand the policy</span>
             </label>
-            <button id="continueBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold disabled:opacity-20 shadow-xl" disabled>Enter Site</button>
+            <button id="continueBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold disabled:opacity-20 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all" disabled>
+                Enter Site
+            </button>
         </div>
     </div>
 
     <script>
-        /* CONFIG */
-        const LOCAL_INVENTORY = 'inventory.json'; // Host this file on your GitHub
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyGDZueQrS9JLbvRafZalycieiaDGaiaEpm5uGy__h85W7E8CK78wQVsjockO-Or0PD/exec
-'; 
-        const FORM_BASE = 'https://forms.gle/UupGJgXhZwab9aXr6';
+        /* --- ⚙️ CONFIGURATION --- */
+        const LOCAL_INVENTORY = 'inventory.json'; // Ensure this exists on GitHub
+        const API_URL = 'YOUR_APPS_SCRIPT_EXEC_URL'; // From Step 1
+        const FORM_BASE = 'YOUR_GOOGLE_FORM_URL';
         const FORM_ORDER_FIELD = 'entry.813489840';
 
         let inventory = [], cart = {};
         const qs = s => document.querySelector(s);
         const fmt = n => '₱' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-        /* MOBILE OVERLAY LOGIC */
-        const toggleCart = () => { qs('#sidebar').classList.toggle('active'); qs('#overlay').classList.toggle('active'); };
+        /* --- 📱 UI HANDLERS --- */
+        const toggleCart = () => {
+            qs('#sidebar').classList.toggle('active');
+            qs('#overlay').classList.toggle('active');
+        };
+
         qs('#mobileCartBtn').onclick = toggleCart;
         qs('#closeCart').onclick = toggleCart;
         qs('#overlay').onclick = toggleCart;
 
-        qs('#agreeCheckbox').onchange = (e) => qs('#continueBtn').disabled = !e.target.checked;
-        qs('#continueBtn').onclick = () => { qs('#disclaimerModal').remove(); loadInventory(); };
+        // Enter Site Logic
+        qs('#agreeCheckbox').onchange = (e) => {
+            qs('#continueBtn').disabled = !e.target.checked;
+        };
 
-        /* LOAD DATA */
+        qs('#continueBtn').onclick = () => {
+            qs('#disclaimerModal').style.display = 'none';
+            loadInventory();
+        };
+
+        /* --- 📦 DATA LOADING --- */
         async function loadInventory() {
+            const grid = qs('#booksGrid');
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 animate-pulse">Checking stock...</div>`;
+            
             try {
-                // Fetch from Local GitHub JSON for Speed
                 const res = await fetch(LOCAL_INVENTORY);
-                if (!res.ok) throw new Error();
+                if (!res.ok) throw new Error("File not found");
                 inventory = await res.json();
-                populateFilters();
                 renderBooks(inventory);
+                populateFilters();
             } catch(e) {
-                qs('#booksGrid').innerHTML = "<div class='col-span-full py-10'>Please ensure inventory.json is uploaded to GitHub.</div>";
+                grid.innerHTML = `
+                <div class="col-span-full bg-rose-50 p-6 rounded-3xl text-rose-600 text-sm font-bold">
+                    ⚠️ Could not load inventory. Ensure inventory.json is uploaded to your GitHub.
+                </div>`;
             }
         }
 
@@ -135,85 +177,89 @@
         }
 
         function renderBooks(list) {
-            qs('#booksGrid').innerHTML = list.map(book => {
+            const grid = qs('#booksGrid');
+            if(!list.length) {
+                grid.innerHTML = `<p class="col-span-full py-20 text-slate-400 text-center">No books found matching your search.</p>`;
+                return;
+            }
+            grid.innerHTML = list.map(book => {
                 const price = book['Discounted Price'] || book.Price;
                 return `
-                <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-50 flex flex-col justify-between hover:shadow-xl transition-all group">
+                <div class="book-card bg-white p-6 rounded-[32px] shadow-sm border border-slate-50 flex flex-col justify-between group">
                     <div class="text-left">
-                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${book.Genre || 'General'}</span>
+                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${book.Genre || 'Collection'}</span>
                         <h3 class="font-bold text-slate-800 text-lg leading-tight my-2 group-hover:text-indigo-600 transition-colors">${book.Title}</h3>
-                        <p class="text-xs font-medium text-slate-400">By ${book.Author}</p>
+                        <p class="text-xs font-medium text-slate-400 italic">By ${book.Author}</p>
                     </div>
                     <div class="flex items-center justify-between mt-8">
-                        <span class="font-black text-slate-900">${fmt(price)}</span>
+                        <span class="font-black text-slate-900 text-xl">${fmt(price)}</span>
                         <button onclick="addToCart('${book.Book_Code}', '${book.Title.replace(/'/g, "\\'")}', '${book.Author.replace(/'/g, "\\'")}', ${price})" 
-                            class="bg-slate-100 text-slate-900 text-[10px] px-5 py-2.5 rounded-xl font-black uppercase tracking-tighter hover:bg-slate-900 hover:text-white transition-all">
+                            class="bg-slate-100 text-slate-900 text-[10px] px-5 py-2.5 rounded-xl font-black uppercase tracking-tighter hover:bg-slate-900 hover:text-white transition-all btn-primary">
                             Add +
                         </button>
                     </div>
                 </div>`}).join('');
         }
 
+        /* --- 🛒 CART LOGIC --- */
         function addToCart(code, title, author, price) {
             if (cart[code]) cart[code].qty++;
             else cart[code] = { code, title, author, price, qty: 1 };
             renderCart();
+            
+            // Mobile feedback
+            const mobileBtn = qs('#mobileCartBtn');
+            mobileBtn.classList.add('scale-110', 'bg-emerald-500');
+            setTimeout(() => mobileBtn.classList.remove('scale-110', 'bg-emerald-500'), 300);
         }
 
         function renderCart() {
             const items = Object.values(cart);
             let total = 0, qty = 0;
+            const container = qs('#cartContent');
+            
             if(!items.length) {
-                qs('#cartContent').innerHTML = '<div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest">Basket is empty</div>';
+                container.innerHTML = '<div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest leading-loose">Basket is empty</div>';
             } else {
-                qs('#cartContent').innerHTML = items.map(item => {
+                container.innerHTML = items.map(item => {
                     total += (item.price * item.qty); qty += item.qty;
-                    return `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
+                    return `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <div class="flex-1"><h4 class="text-xs font-bold text-slate-800 line-clamp-1">${item.title}</h4></div>
-                        <input type="number" value="${item.qty}" min="0" onchange="updateQty('${item.code}', this.value)" class="w-12 bg-white rounded-lg text-xs p-2 font-bold text-center border-none ml-2" />
+                        <div class="flex items-center gap-2 ml-4">
+                            <input type="number" value="${item.qty}" min="0" onchange="updateQty('${item.code}', this.value)" 
+                                class="w-12 bg-white rounded-lg text-xs p-2 font-bold text-center border-none shadow-sm focus:ring-1 focus:ring-indigo-500" />
+                        </div>
                     </div>`;
                 }).join('');
             }
-            qs('#totalQty').innerText = qty; qs('#mobileCount').innerText = qty;
+            qs('#totalQty').innerText = qty; 
+            qs('#mobileCount').innerText = qty;
             qs('#grandTotal').innerText = fmt(total);
         }
 
         function updateQty(code, v) { 
-            if(v <= 0) delete cart[code]; 
-            else cart[code].qty = parseInt(v); 
+            const val = parseInt(v);
+            if(val <= 0) delete cart[code]; 
+            else cart[code].qty = val; 
             renderCart(); 
         }
 
-        qs('#clearCart').onclick = () => { if(confirm("Clear selection?")) { cart = {}; renderCart(); }};
+        qs('#clearCart').onclick = () => { if(confirm("Clear your basket?")) { cart = {}; renderCart(); }};
 
-        /* SUCCESS HANDLER */
-        function handleFinalize(url) {
-            window.open(url, '_blank');
-            setTimeout(() => {
-                document.body.innerHTML = `
-                <div class="h-screen flex items-center justify-center p-10 text-center bg-white">
-                    <div class="animate-pop">
-                        <div class="text-6xl mb-6">🎯</div>
-                        <h1 class="text-3xl font-black mb-2 italic">Done!</h1>
-                        <p class="text-slate-500 text-sm max-w-xs mx-auto">Your order is logged. Please complete the Google Form opened in the other tab.</p>
-                        <button onclick="location.reload()" class="mt-10 bg-slate-100 px-8 py-3 rounded-full text-slate-900 font-bold text-xs uppercase tracking-widest hover:bg-slate-200">New Reservation</button>
-                    </div>
-                </div>`;
-            }, 1000);
-        }
-
-        /* CONFIRMATION LOGIC */
+        /* --- 🚀 RESERVATION SUBMISSION --- */
         qs('#confirmBtn').onclick = async () => {
             const items = Object.values(cart);
-            if (!items.length) return alert("Select books first.");
+            if (!items.length) return alert("Your basket is empty!");
             
             const btn = qs('#confirmBtn');
-            btn.disabled = true; btn.innerText = "Writing to Database...";
+            btn.disabled = true; 
+            btn.innerText = "Securing Reservation...";
 
             const totalItem = items.reduce((s, i) => s + i.qty, 0);
             const grandTotal = items.reduce((s, i) => s + (i.price * i.qty), 0);
 
             try {
+                // Matches the column structure for your "Reservation" Sheet
                 const payload = { items, total: grandTotal, totalItem: totalItem };
                 const body = 'data=' + encodeURIComponent(JSON.stringify(payload));
                 
@@ -227,19 +273,40 @@
                 if (data.success) {
                     const formLink = `${FORM_BASE}?${FORM_ORDER_FIELD}=${data.orderID}`;
                     qs('#confirmationBox').innerHTML = `
-                        <div class="bg-indigo-600 p-8 rounded-[40px] text-center shadow-2xl">
-                            <p class="text-white font-black text-xl mb-1 italic">OrderID: ${data.orderID}</p>
-                            <p class="text-indigo-200 text-[10px] mb-8 uppercase tracking-widest font-bold">Copy this ID for pick-up</p>
-                            <button onclick="handleFinalize('${formLink}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-sm font-black shadow-lg hover:scale-105 transition-transform">GO TO FORM & CLOSE</button>
+                        <div class="bg-indigo-600 p-8 rounded-[40px] text-center shadow-2xl animate-pop">
+                            <p class="text-white font-black text-xl mb-1 italic">Order ID: ${data.orderID}</p>
+                            <p class="text-indigo-200 text-[10px] mb-8 uppercase tracking-widest font-bold">Save this ID for pick-up</p>
+                            <button onclick="handleFinalize('${formLink}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-sm font-black shadow-lg hover:scale-[1.02] transition-transform">
+                                FINALIZE ON GOOGLE FORM
+                            </button>
                         </div>`;
                     qs('#confirmationBox').classList.remove('hidden');
                     btn.classList.add('hidden');
                     cart = {}; renderCart();
                 }
-            } catch (e) { alert("Error connecting to server."); }
-            finally { btn.disabled = false; btn.innerText = "Confirm Reservation"; }
+            } catch (e) { 
+                alert("Connection failed. Please check your internet and try again."); 
+                btn.disabled = false;
+                btn.innerText = "Confirm Reservation";
+            }
         };
 
+        function handleFinalize(url) {
+            window.open(url, '_blank');
+            setTimeout(() => {
+                document.body.innerHTML = `
+                <div class="h-screen flex items-center justify-center p-10 text-center bg-white">
+                    <div class="max-w-xs animate-pop">
+                        <div class="text-6xl mb-6">🚀</div>
+                        <h1 class="text-3xl font-black mb-2 italic text-slate-900">Forwarded!</h1>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-10">We've redirected you to the payment form. Please complete it to finalize your book reservation.</p>
+                        <button onclick="location.reload()" class="bg-slate-100 px-8 py-4 rounded-2xl text-slate-900 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors">Start New Order</button>
+                    </div>
+                </div>`;
+            }, 1000);
+        }
+
+        /* --- 🔍 SEARCH & FILTERS --- */
         const filterAction = () => {
             const q = qs('#searchTitle').value.toLowerCase();
             const a = qs('#filterAuthor').value;
@@ -250,9 +317,11 @@
                 (!g || b.Genre === g)
             ));
         };
+
         qs('#searchTitle').oninput = filterAction;
         qs('#filterAuthor').onchange = filterAction;
         qs('#filterGenre').onchange = filterAction;
+
     </script>
 </body>
 </html>
