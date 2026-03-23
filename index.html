@@ -3,74 +3,96 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
-    <title>BookLoop | Premium Reservation</title>
+    <title>BookLoop | Expert Reservation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fcfcfd; color: #0f172a; }
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        .book-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #f1f5f9; }
-        .book-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.12); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
         @media (max-width: 1024px) {
-            #sidebar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform 0.5s ease; max-height: 80vh; border-radius: 40px 40px 0 0; }
-            #sidebar.active { transform: translateY(0); }
+            #sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+                transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                max-height: 85vh; overflow-y: auto; border-radius: 32px 32px 0 0;
+            }
+            #sidebar.active { transform: translateY(0); box-shadow: 0 -20px 25px -5px rgba(0,0,0,0.1); }
+            .overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 40; }
+            .overlay.active { display: block; }
         }
-        .gradient-bg { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .gradient-text { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: pop 0.3s ease-out; }
+        @keyframes pop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="pb-24 lg:pb-0">
+    <div class="overlay" id="overlay"></div>
 
-    <div id="overlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden backdrop-blur-sm"></div>
-
-    <header class="sticky top-0 z-30 glass border-b border-slate-100 px-6 py-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <h1 class="text-3xl font-extrabold italic gradient-text">BookLoop.</h1>
-            <div class="flex flex-1 max-w-2xl gap-2">
-                <input id="searchTitle" type="search" placeholder="Search title..." class="w-full bg-slate-50 rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                <button id="mobileCartBtn" class="lg:hidden gradient-bg text-white px-6 rounded-2xl text-sm font-bold shadow-lg">🛒 <span id="mobileCount">0</span></button>
+    <header class="sticky top-0 z-30 glass border-b border-slate-200 px-4 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-black text-indigo-600 tracking-tight italic">BookLoop.</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Premium Inventory Portal</p>
+                </div>
+                <button id="mobileCartBtn" class="lg:hidden bg-indigo-600 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl flex items-center gap-2">
+                    🛒 <span id="mobileCount">0</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input id="searchTitle" type="search" placeholder="Search title..." class="bg-slate-100 rounded-2xl px-4 py-3 text-sm border-none focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <select id="filterAuthor" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none"><option value="">All Authors</option></select>
+                <select id="filterGenre" class="bg-slate-100 rounded-2xl px-3 py-3 text-sm border-none"><option value="">All Genres</option></select>
             </div>
         </div>
     </header>
 
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex flex-col lg:flex-row gap-12">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-10">
             <main class="flex-1">
-                <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+                <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </main>
 
-            <aside id="sidebar" class="w-full lg:w-[380px] bg-white p-8 lg:rounded-[48px] border border-slate-100 shadow-2xl flex flex-col h-fit lg:sticky lg:top-32">
-                <h3 class="text-xl font-bold mb-8">Your Basket</h3>
-                <div id="cartContent" class="space-y-4 mb-8 overflow-y-auto max-h-[40vh]"></div>
-                <div class="bg-slate-50 rounded-[32px] p-8 space-y-4">
-                    <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase">
-                        <span>Items</span> <span id="totalQty" class="text-slate-900">0</span>
+            <aside id="sidebar" class="w-full lg:w-[400px] bg-white p-8 border-l border-slate-100 flex flex-col">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-xl font-bold tracking-tight">Your Cart</h3>
+                    <button id="clearCart" class="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:bg-rose-50 px-3 py-1 rounded-full">Reset</button>
+                </div>
+                
+                <div id="cartContent" class="space-y-4 mb-8 flex-grow">
+                    <div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest">Basket is empty</div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 space-y-4">
+                    <div class="flex justify-between text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                        <span>Total Items</span> <span id="totalQty">0</span>
                     </div>
-                    <div class="flex justify-between items-end border-t pt-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase">Total</span>
-                        <span id="grandTotal" class="text-3xl font-black text-indigo-600">₱0.00</span>
+                    <div class="flex justify-between text-3xl font-black text-slate-900">
+                        <span>Total</span> <span id="grandTotal" class="text-indigo-600">₱0.00</span>
                     </div>
                 </div>
-                <button id="confirmBtn" class="w-full mt-6 gradient-bg text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all">Confirm Reservation</button>
-                <div id="confirmationBox" class="hidden mt-6"></div>
-                <button id="closeCart" class="lg:hidden w-full mt-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Close</button>
+
+                <button id="confirmBtn" class="w-full mt-8 bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-2xl hover:bg-indigo-600 transition-all active:scale-95">Confirm Reservation</button>
+                <div id="confirmationBox" class="hidden mt-6 animate-pop"></div>
+                <button id="closeCart" class="lg:hidden w-full mt-6 text-slate-300 text-[10px] font-bold tracking-[.3em] py-2">CLOSE CART</button>
             </aside>
         </div>
     </div>
 
-    <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-xl">
-        <div class="bg-white w-full max-w-md rounded-[56px] p-12 shadow-2xl text-center">
-            <h2 class="text-3xl font-black mb-4 tracking-tighter">BookLoop Portal</h2>
-            <p class="text-sm text-slate-400 mb-10 leading-relaxed">Book reservations are for store pick-up only.</p>
-            <button id="continueBtn" class="w-full gradient-bg text-white py-5 rounded-3xl font-bold shadow-xl">Enter Portal</button>
+    <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
+        <div class="bg-white w-full max-w-md rounded-[40px] p-10 shadow-2xl text-center animate-pop">
+            <h2 class="text-2xl font-black mb-4">Wait!</h2>
+            <p class="text-sm text-slate-500 mb-8 leading-relaxed">Payment must be completed first. You'll get an <b>Order ID</b> here, then finish the details in a Google Form.</p>
+            <label class="flex items-center justify-center gap-3 mb-8 cursor-pointer">
+                <input id="agreeCheckbox" type="checkbox" class="w-6 h-6 rounded-lg border-slate-200 text-indigo-600 shadow-sm focus:ring-0"/> 
+                <span class="text-sm font-bold text-slate-700">I agree to the terms</span>
+            </label>
+            <button id="continueBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold disabled:opacity-20 shadow-xl" disabled>Enter Site</button>
         </div>
     </div>
 
     <script>
+        /* CONFIG */
         const LOCAL_INVENTORY = 'inventory.json';
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzud7TEs70qcLoxDeGqDpaZULNla18TeqN4c2aBK3amaVn3p5ym8aH66hsP-WW_P2gL/exec'; 
+        const API_URL = 'YOUR_APPS_SCRIPT_URL'; 
         const FORM_BASE = 'https://forms.gle/UupGJgXhZwab9aXr6';
         const FORM_ORDER_FIELD = 'entry.813489840';
 
@@ -78,98 +100,152 @@
         const qs = s => document.querySelector(s);
         const fmt = n => '₱' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-        qs('#continueBtn').onclick = () => { loadInventory(); };
-        const toggleCart = () => { qs('#sidebar').classList.toggle('active'); qs('#overlay').classList.toggle('hidden'); };
+        const toggleCart = () => { qs('#sidebar').classList.toggle('active'); qs('#overlay').classList.toggle('active'); };
         qs('#mobileCartBtn').onclick = toggleCart;
         qs('#closeCart').onclick = toggleCart;
         qs('#overlay').onclick = toggleCart;
+
+        qs('#agreeCheckbox').onchange = (e) => qs('#continueBtn').disabled = !e.target.checked;
+        qs('#continueBtn').onclick = () => { qs('#disclaimerModal').remove(); loadInventory(); };
 
         async function loadInventory() {
             try {
                 const res = await fetch(LOCAL_INVENTORY);
                 if (!res.ok) throw new Error();
                 inventory = await res.json();
+                populateFilters();
                 renderBooks(inventory);
-                qs('#disclaimerModal').remove();
-            } catch(e) { alert("Missing inventory.json file!"); }
+            } catch(e) {
+                qs('#booksGrid').innerHTML = "<div class='col-span-full py-10 text-center'>Ensure inventory.json is in the same folder.</div>";
+            }
+        }
+
+        function populateFilters() {
+            const authors = [...new Set(inventory.map(b => b.Author).filter(Boolean))].sort();
+            const genres = [...new Set(inventory.map(b => b.Genre).filter(Boolean))].sort();
+            qs('#filterAuthor').innerHTML += authors.map(a => `<option value="${a}">${a}</option>`).join('');
+            qs('#filterGenre').innerHTML += genres.map(g => `<option value="${g}">${g}</option>`).join('');
         }
 
         function renderBooks(list) {
             qs('#booksGrid').innerHTML = list.map(book => {
-                const final = book.Discounted_Price || book.Price;
+                const price = book['Discounted Price'] || book.Price;
                 return `
-                <div class="book-card bg-white p-8 rounded-[40px] border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <span class="text-[9px] font-black text-indigo-500 uppercase bg-indigo-50 px-3 py-1 rounded-full">${book.Genre || 'Books'}</span>
-                        <h3 class="font-bold text-slate-800 text-lg mt-4">${book.Title}</h3>
-                        <p class="text-xs text-slate-400">By ${book.Author}</p>
+                <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-50 flex flex-col justify-between hover:shadow-xl transition-all group">
+                    <div class="text-left">
+                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${book.Genre || 'General'}</span>
+                        <h3 class="font-bold text-slate-800 text-lg leading-tight my-2 group-hover:text-indigo-600 transition-colors">${book.Title}</h3>
+                        <p class="text-xs font-medium text-slate-400">By ${book.Author}</p>
                     </div>
-                    <div class="mt-10 flex items-center justify-between">
-                        <span class="font-black text-slate-900 text-2xl tracking-tighter">${fmt(final)}</span>
-                        <button onclick="addToCart('${book.Book_Code}', '${book.Title.replace(/'/g, "\\'")}', '${book.Author.replace(/'/g, "\\'")}', ${final}, ${book.Price})" 
-                                class="bg-slate-900 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-indigo-600 shadow-lg font-bold text-xl">+</button>
+                    <div class="flex items-center justify-between mt-8">
+                        <span class="font-black text-slate-900">${fmt(price)}</span>
+                        <button onclick="addToCart('${book.Book_Code}', '${book.Title.replace(/'/g, "\\'")}', '${book.Author.replace(/'/g, "\\'")}', ${price}, ${book.Price})" 
+                           class="bg-slate-100 text-slate-900 text-[10px] px-5 py-2.5 rounded-xl font-black uppercase tracking-tighter hover:bg-slate-900 hover:text-white transition-all">
+                            Add +
+                        </button>
                     </div>
-                </div>`;
-            }).join('');
+                </div>`}).join('');
         }
 
         function addToCart(code, title, author, price, originalPrice) {
             if (cart[code]) cart[code].qty++;
-            else cart[code] = { code, title, author, price, originalPrice, qty: 1 };
+            else cart[code] = { code, title, author, price, originalPrice: originalPrice || price, qty: 1 };
             renderCart();
         }
 
         function renderCart() {
             const items = Object.values(cart);
             let total = 0, qty = 0;
-            qs('#cartContent').innerHTML = items.length ? items.map(item => {
-                total += (item.price * item.qty); qty += item.qty;
-                return `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-[24px]">
-                    <div class="flex-1"><h4 class="text-[10px] font-black uppercase truncate">${item.title}</h4><p class="text-[10px] text-indigo-500">${fmt(item.price)}</p></div>
-                    <div class="flex items-center gap-2"><button onclick="updateQty('${item.code}', ${item.qty-1})">-</button><span>${item.qty}</span><button onclick="updateQty('${item.code}', ${item.qty+1})">+</button></div>
-                </div>`;
-            }).join('') : '<p class="text-center opacity-30 text-xs">Bag is empty</p>';
-            qs('#totalQty').innerText = qty; qs('#mobileCount').innerText = qty; qs('#grandTotal').innerText = fmt(total);
+            if(!items.length) {
+                qs('#cartContent').innerHTML = '<div class="py-10 text-center text-slate-300 text-xs font-bold uppercase tracking-widest">Basket is empty</div>';
+            } else {
+                qs('#cartContent').innerHTML = items.map(item => {
+                    total += (item.price * item.qty); qty += item.qty;
+                    return `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
+                        <div class="flex-1"><h4 class="text-xs font-bold text-slate-800 line-clamp-1">${item.title}</h4></div>
+                        <input type="number" value="${item.qty}" min="0" onchange="updateQty('${item.code}', this.value)" class="w-12 bg-white rounded-lg text-xs p-2 font-bold text-center border-none ml-2" />
+                    </div>`;
+                }).join('');
+            }
+            qs('#totalQty').innerText = qty; qs('#mobileCount').innerText = qty;
+            qs('#grandTotal').innerText = fmt(total);
         }
 
-        function updateQty(c, v) { if(v <= 0) delete cart[c]; else cart[c].qty = v; renderCart(); }
+        function updateQty(code, v) { 
+            if(v <= 0) delete cart[code]; 
+            else cart[code].qty = parseInt(v); 
+            renderCart(); 
+        }
+
+        qs('#clearCart').onclick = () => { if(confirm("Clear selection?")) { cart = {}; renderCart(); }};
+
+        function handleFinalize(url) {
+            window.open(url, '_blank');
+            setTimeout(() => {
+                document.body.innerHTML = `
+                <div class="h-screen flex items-center justify-center p-10 text-center bg-white">
+                    <div class="animate-pop">
+                        <div class="text-6xl mb-6">🎯</div>
+                        <h1 class="text-3xl font-black mb-2 italic">Done!</h1>
+                        <p class="text-slate-500 text-sm max-w-xs mx-auto">Your order is logged. Please complete the Google Form opened in the other tab.</p>
+                        <button onclick="location.reload()" class="mt-10 bg-slate-100 px-8 py-3 rounded-full text-slate-900 font-bold text-xs uppercase tracking-widest hover:bg-slate-200">New Reservation</button>
+                    </div>
+                </div>`;
+            }, 1000);
+        }
 
         qs('#confirmBtn').onclick = async () => {
             const items = Object.values(cart);
             if (!items.length) return alert("Select books first.");
-            const btn = qs('#confirmBtn'); btn.disabled = true; btn.innerText = "Processing...";
+            
+            const btn = qs('#confirmBtn');
+            btn.disabled = true; btn.innerText = "Syncing...";
 
-            // THE GENERATOR - Matches your requirement
+            // ID GENERATION
             const orderID = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
             const resID = "RSVID" + new Date().toISOString().split('T')[0].replace(/-/g, '') + Math.floor(1000 + Math.random() * 9000);
 
             const payload = { 
-                reservationID: resID, 
+                items, 
                 orderID: orderID, 
-                items: items, 
-                totalAmount: items.reduce((s,i) => s + (i.price*i.qty),0),
-                itemCount: items.reduce((s,i) => s + i.qty,0)
+                reservationID: resID,
+                totalAmount: items.reduce((s, i) => s + (i.price * i.qty), 0),
+                itemCount: items.reduce((s, i) => s + i.qty, 0)
             };
 
             try {
-                const resp = await fetch(API_URL, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}, 
-                    body: 'data=' + encodeURIComponent(JSON.stringify(payload)) 
+                const resp = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'data=' + encodeURIComponent(JSON.stringify(payload))
                 });
                 const data = await resp.json();
+                
                 if (data.success) {
-                    qs('#confirmationBox').innerHTML = `<div class="bg-indigo-600 p-8 rounded-[40px] text-center text-white animate-pop shadow-2xl">
-                        <p class="text-[10px] font-bold uppercase opacity-60 mb-2">Your Order ID</p>
-                        <h4 class="text-3xl font-black italic mb-6">#${orderID}</h4>
-                        <button onclick="handleFinalize('${FORM_BASE}?${FORM_ORDER_FIELD}=${orderID}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg">Open Payment Form</button>
-                    </div>`;
-                    qs('#confirmationBox').classList.remove('hidden'); btn.classList.add('hidden'); cart = {}; renderCart();
+                    const formLink = `${FORM_BASE}?${FORM_ORDER_FIELD}=${orderID}`;
+                    qs('#confirmationBox').innerHTML = `
+                        <div class="bg-indigo-600 p-8 rounded-[40px] text-center shadow-2xl">
+                            <p class="text-white font-black text-xl mb-1 italic">${orderID}</p>
+                            <p class="text-indigo-200 text-[10px] mb-8 uppercase tracking-widest font-bold">Recorded Successfully</p>
+                            <button onclick="handleFinalize('${formLink}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-sm font-black shadow-lg">GO TO PAYMENT FORM</button>
+                        </div>`;
+                    qs('#confirmationBox').classList.remove('hidden');
+                    btn.classList.add('hidden');
+                    cart = {}; renderCart();
                 }
-            } catch (e) { alert("Sync error."); btn.disabled = false; btn.innerText = "Confirm Reservation"; }
+            } catch (e) { alert("Server error. Check Apps Script URL."); }
+            finally { btn.disabled = false; btn.innerText = "Confirm Reservation"; }
         };
 
-        function handleFinalize(url) { window.open(url, '_blank'); setTimeout(() => location.reload(), 2000); }
+        const filterAction = () => {
+            const q = qs('#searchTitle').value.toLowerCase();
+            const a = qs('#filterAuthor').value;
+            const g = qs('#filterGenre').value;
+            renderBooks(inventory.filter(b => b.Title.toLowerCase().includes(q) && (!a || b.Author === a) && (!g || b.Genre === g)));
+        };
+        qs('#searchTitle').oninput = filterAction;
+        qs('#filterAuthor').onchange = filterAction;
+        qs('#filterGenre').onchange = filterAction;
     </script>
 </body>
 </html>
