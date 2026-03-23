@@ -10,16 +10,15 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fcfcfd; color: #0f172a; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .book-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #f1f5f9; }
-        .book-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.12); border-color: #e2e8f0; }
+        .book-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.12); }
         @media (max-width: 1024px) {
-            #sidebar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); max-height: 80vh; border-radius: 40px 40px 0 0; }
+            #sidebar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; transform: translateY(100%); transition: transform 0.5s ease; max-height: 80vh; border-radius: 40px 40px 0 0; }
             #sidebar.active { transform: translateY(0); }
         }
         .gradient-bg { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
         .gradient-text { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="pb-24 lg:pb-0">
@@ -28,15 +27,10 @@
 
     <header class="sticky top-0 z-30 glass border-b border-slate-100 px-6 py-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <h1 class="text-3xl font-extrabold tracking-tighter italic gradient-text">BookLoop.</h1>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Exclusive Collection</p>
-            </div>
+            <h1 class="text-3xl font-extrabold italic gradient-text">BookLoop.</h1>
             <div class="flex flex-1 max-w-2xl gap-2">
-                <input id="searchTitle" type="search" placeholder="Search by title..." class="w-full bg-slate-50 rounded-2xl px-5 py-3 text-sm border-none focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                <button id="mobileCartBtn" class="lg:hidden gradient-bg text-white px-6 rounded-2xl text-sm font-bold shadow-lg flex items-center gap-2">
-                    <span id="mobileCount">0</span> 🛒
-                </button>
+                <input id="searchTitle" type="search" placeholder="Search title..." class="w-full bg-slate-50 rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                <button id="mobileCartBtn" class="lg:hidden gradient-bg text-white px-6 rounded-2xl text-sm font-bold shadow-lg">🛒 <span id="mobileCount">0</span></button>
             </div>
         </div>
     </header>
@@ -44,46 +38,39 @@
     <div class="max-w-7xl mx-auto px-6 py-12">
         <div class="flex flex-col lg:flex-row gap-12">
             <main class="flex-1">
-                <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
-                    <select id="filterAuthor" class="bg-white border border-slate-200 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-wider outline-none"><option value="">All Authors</option></select>
-                    <select id="filterGenre" class="bg-white border border-slate-200 rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-wider outline-none"><option value="">All Genres</option></select>
-                </div>
                 <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"></div>
             </main>
 
             <aside id="sidebar" class="w-full lg:w-[380px] bg-white p-8 lg:rounded-[48px] border border-slate-100 shadow-2xl flex flex-col h-fit lg:sticky lg:top-32">
-                <div class="flex justify-between items-center mb-8">
-                    <h3 class="text-xl font-bold tracking-tight text-slate-900">Your Basket</h3>
-                    <button id="clearCart" class="text-[10px] font-bold text-slate-300 uppercase tracking-widest hover:text-rose-500">Reset</button>
-                </div>
-                <div id="cartContent" class="space-y-4 mb-8 flex-grow overflow-y-auto max-h-[40vh] pr-2"></div>
+                <h3 class="text-xl font-bold mb-8">Your Basket</h3>
+                <div id="cartContent" class="space-y-4 mb-8 overflow-y-auto max-h-[40vh]"></div>
                 <div class="bg-slate-50 rounded-[32px] p-8 space-y-4">
-                    <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                        <span>Quantity</span> <span id="totalQty" class="text-slate-900 font-black">0</span>
+                    <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase">
+                        <span>Items</span> <span id="totalQty" class="text-slate-900">0</span>
                     </div>
-                    <div class="flex justify-between items-end border-t border-slate-200 pt-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total</span>
+                    <div class="flex justify-between items-end border-t pt-4">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Total</span>
                         <span id="grandTotal" class="text-3xl font-black text-indigo-600">₱0.00</span>
                     </div>
                 </div>
                 <button id="confirmBtn" class="w-full mt-6 gradient-bg text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all">Confirm Reservation</button>
                 <div id="confirmationBox" class="hidden mt-6"></div>
-                <button id="closeCart" class="lg:hidden w-full mt-6 text-slate-400 text-[10px] font-bold tracking-widest py-2">DISMISS</button>
+                <button id="closeCart" class="lg:hidden w-full mt-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Close</button>
             </aside>
         </div>
     </div>
 
     <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-xl">
         <div class="bg-white w-full max-w-md rounded-[56px] p-12 shadow-2xl text-center">
-            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter">Welcome</h2>
-            <p class="text-sm text-slate-400 mb-10 leading-relaxed">Book reservations are for store pick-up.</p>
+            <h2 class="text-3xl font-black mb-4 tracking-tighter">BookLoop Portal</h2>
+            <p class="text-sm text-slate-400 mb-10 leading-relaxed">Book reservations are for store pick-up only.</p>
             <button id="continueBtn" class="w-full gradient-bg text-white py-5 rounded-3xl font-bold shadow-xl">Enter Portal</button>
         </div>
     </div>
 
     <script>
         const LOCAL_INVENTORY = 'inventory.json';
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxACW2pLYUAV1ezEeVONqM5mMsGYZs9qZqlgJx2Vq2lGj02UEc3aT43EjNYVqrdmyzf/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzud7TEs70qcLoxDeGqDpaZULNla18TeqN4c2aBK3amaVn3p5ym8aH66hsP-WW_P2gL/exec'; 
         const FORM_BASE = 'https://forms.gle/UupGJgXhZwab9aXr6';
         const FORM_ORDER_FIELD = 'entry.813489840';
 
@@ -91,12 +78,7 @@
         const qs = s => document.querySelector(s);
         const fmt = n => '₱' + Number(n).toLocaleString(undefined, {minimumFractionDigits: 2});
 
-        // 1. ENTER PORTAL LOGIC
-        qs('#continueBtn').onclick = () => { 
-            console.log("Button clicked, loading inventory...");
-            loadInventory(); 
-        };
-
+        qs('#continueBtn').onclick = () => { loadInventory(); };
         const toggleCart = () => { qs('#sidebar').classList.toggle('active'); qs('#overlay').classList.toggle('hidden'); };
         qs('#mobileCartBtn').onclick = toggleCart;
         qs('#closeCart').onclick = toggleCart;
@@ -105,52 +87,27 @@
         async function loadInventory() {
             try {
                 const res = await fetch(LOCAL_INVENTORY);
-                if (!res.ok) throw new Error("File not found");
-                
+                if (!res.ok) throw new Error();
                 inventory = await res.json();
-                console.log("Inventory loaded:", inventory);
-                
                 renderBooks(inventory);
-                populateFilters();
-                
-                // ONLY REMOVE MODAL IF LOAD SUCCESSFUL
-                qs('#disclaimerModal').remove(); 
-            } catch(e) { 
-                console.error("Load failed", e);
-                alert("Cannot load inventory.json. Make sure the file exists in the folder and you are running via a local server (like Live Server).");
-            }
-        }
-
-        function populateFilters() {
-            const authors = [...new Set(inventory.map(b => b.Author).filter(Boolean))].sort();
-            const genres = [...new Set(inventory.map(b => b.Genre).filter(Boolean))].sort();
-            qs('#filterAuthor').innerHTML = '<option value="">All Authors</option>' + authors.map(a => `<option value="${a}">${a}</option>`).join('');
-            qs('#filterGenre').innerHTML = '<option value="">All Genres</option>' + genres.map(g => `<option value="${g}">${g}</option>`).join('');
+                qs('#disclaimerModal').remove();
+            } catch(e) { alert("Missing inventory.json file!"); }
         }
 
         function renderBooks(list) {
-            const grid = qs('#booksGrid');
-            if (list.length === 0) {
-                grid.innerHTML = '<p class="col-span-3 text-center py-20 text-slate-400">No books found.</p>';
-                return;
-            }
-            grid.innerHTML = list.map(book => {
-                const p = Number(book.Price || 0), d = Number(book.Discounted_Price || 0);
-                const final = (d > 0 && d < p) ? d : p;
+            qs('#booksGrid').innerHTML = list.map(book => {
+                const final = book.Discounted_Price || book.Price;
                 return `
-                <div class="book-card bg-white p-8 rounded-[40px] flex flex-col justify-between group">
+                <div class="book-card bg-white p-8 rounded-[40px] border border-slate-100 flex flex-col justify-between">
                     <div>
-                        <span class="text-[9px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">${book.Genre || 'Books'}</span>
-                        <h3 class="font-bold text-slate-800 text-lg mt-4 leading-tight">${book.Title}</h3>
-                        <p class="text-xs text-slate-400 mt-1">By ${book.Author}</p>
+                        <span class="text-[9px] font-black text-indigo-500 uppercase bg-indigo-50 px-3 py-1 rounded-full">${book.Genre || 'Books'}</span>
+                        <h3 class="font-bold text-slate-800 text-lg mt-4">${book.Title}</h3>
+                        <p class="text-xs text-slate-400">By ${book.Author}</p>
                     </div>
                     <div class="mt-10 flex items-center justify-between">
-                        <div class="flex flex-col">
-                            ${(d > 0 && d < p) ? `<span class="text-[10px] text-slate-300 line-through font-bold">₱${p}</span>` : ''}
-                            <span class="font-black text-slate-900 text-2xl tracking-tighter">${fmt(final)}</span>
-                        </div>
-                        <button onclick="addToCart('${book.Book_Code}', '${book.Title.replace(/'/g, "\\'")}', '${book.Author.replace(/'/g, "\\'")}', ${final}, ${p})" 
-                                class="bg-slate-900 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition-all shadow-lg active:scale-90 font-light text-2xl">+</button>
+                        <span class="font-black text-slate-900 text-2xl tracking-tighter">${fmt(final)}</span>
+                        <button onclick="addToCart('${book.Book_Code}', '${book.Title.replace(/'/g, "\\'")}', '${book.Author.replace(/'/g, "\\'")}', ${final}, ${book.Price})" 
+                                class="bg-slate-900 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-indigo-600 shadow-lg font-bold text-xl">+</button>
                     </div>
                 </div>`;
             }).join('');
@@ -168,35 +125,30 @@
             qs('#cartContent').innerHTML = items.length ? items.map(item => {
                 total += (item.price * item.qty); qty += item.qty;
                 return `<div class="flex justify-between items-center bg-slate-50 p-4 rounded-[24px]">
-                    <div class="flex-1"><h4 class="text-[10px] font-black truncate uppercase tracking-tight">${item.title}</h4><p class="text-[10px] text-indigo-500 font-bold">${fmt(item.price)}</p></div>
-                    <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg shadow-sm">
-                        <button onclick="updateQty('${item.code}', ${item.qty-1})" class="px-1 text-slate-300 hover:text-rose-500">-</button>
-                        <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                        <button onclick="updateQty('${item.code}', ${item.qty+1})" class="px-1 text-slate-300 hover:text-indigo-500">+</button>
-                    </div>
+                    <div class="flex-1"><h4 class="text-[10px] font-black uppercase truncate">${item.title}</h4><p class="text-[10px] text-indigo-500">${fmt(item.price)}</p></div>
+                    <div class="flex items-center gap-2"><button onclick="updateQty('${item.code}', ${item.qty-1})">-</button><span>${item.qty}</span><button onclick="updateQty('${item.code}', ${item.qty+1})">+</button></div>
                 </div>`;
-            }).join('') : '<div class="py-10 text-center opacity-20"><p class="text-[10px] font-bold uppercase tracking-widest">Bag is empty</p></div>';
+            }).join('') : '<p class="text-center opacity-30 text-xs">Bag is empty</p>';
             qs('#totalQty').innerText = qty; qs('#mobileCount').innerText = qty; qs('#grandTotal').innerText = fmt(total);
         }
 
         function updateQty(c, v) { if(v <= 0) delete cart[c]; else cart[c].qty = v; renderCart(); }
-        qs('#clearCart').onclick = () => { if(confirm("Reset cart?")) { cart = {}; renderCart(); }};
 
         qs('#confirmBtn').onclick = async () => {
             const items = Object.values(cart);
             if (!items.length) return alert("Select books first.");
             const btn = qs('#confirmBtn'); btn.disabled = true; btn.innerText = "Processing...";
 
-            const orderID = "BK-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+            // THE GENERATOR - Matches your requirement
+            const orderID = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
             const resID = "RSVID" + new Date().toISOString().split('T')[0].replace(/-/g, '') + Math.floor(1000 + Math.random() * 9000);
 
             const payload = { 
                 reservationID: resID, 
                 orderID: orderID, 
-                items, 
+                items: items, 
                 totalAmount: items.reduce((s,i) => s + (i.price*i.qty),0),
-                itemCount: items.reduce((s,i) => s + i.qty,0),
-                timestamp: new Date().toLocaleDateString()
+                itemCount: items.reduce((s,i) => s + i.qty,0)
             };
 
             try {
@@ -208,25 +160,16 @@
                 const data = await resp.json();
                 if (data.success) {
                     qs('#confirmationBox').innerHTML = `<div class="bg-indigo-600 p-8 rounded-[40px] text-center text-white animate-pop shadow-2xl">
-                        <p class="text-[10px] font-bold uppercase opacity-60 mb-2">Order ID</p>
+                        <p class="text-[10px] font-bold uppercase opacity-60 mb-2">Your Order ID</p>
                         <h4 class="text-3xl font-black italic mb-6">#${orderID}</h4>
-                        <button onclick="handleFinalize('${FORM_BASE}?${FORM_ORDER_FIELD}=${orderID}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Go to Payment Form</button>
+                        <button onclick="handleFinalize('${FORM_BASE}?${FORM_ORDER_FIELD}=${orderID}')" class="w-full bg-white text-indigo-600 py-4 rounded-2xl text-[10px] font-black uppercase shadow-lg">Open Payment Form</button>
                     </div>`;
                     qs('#confirmationBox').classList.remove('hidden'); btn.classList.add('hidden'); cart = {}; renderCart();
                 }
-            } catch (e) { alert("Server error. Check your Apps Script deployment."); btn.disabled = false; btn.innerText = "Confirm Reservation"; }
+            } catch (e) { alert("Sync error."); btn.disabled = false; btn.innerText = "Confirm Reservation"; }
         };
 
-        function handleFinalize(url) { 
-            window.open(url, '_blank'); 
-            setTimeout(() => { location.reload(); }, 1500); 
-        }
-
-        const filterAction = () => {
-            const q = qs('#searchTitle').value.toLowerCase(), a = qs('#filterAuthor').value, g = qs('#filterGenre').value;
-            renderBooks(inventory.filter(b => b.Title.toLowerCase().includes(q) && (!a || b.Author === a) && (!g || b.Genre === g)));
-        };
-        qs('#searchTitle').oninput = filterAction; qs('#filterAuthor').onchange = filterAction; qs('#filterGenre').onchange = filterAction;
+        function handleFinalize(url) { window.open(url, '_blank'); setTimeout(() => location.reload(), 2000); }
     </script>
 </body>
 </html>
